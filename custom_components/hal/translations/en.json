@@ -1,0 +1,53 @@
+{
+    "title": "HAL CA1006 multi-zone amplifier",
+    "config": {
+        "step": {
+            "user": {
+                "description": "If you need help with the configuration have a look here: {documentation_url}",
+                "data": {
+                    "host": "Host",
+                    "port": "Port",
+                    "hal_name": "Device Name",
+                    "scan_interval": "Scan Interval",
+                    "hal_select_interval": "HAL Select Interval (s)",
+                    "zone_1_valid": "Zone 1 has speakers?",
+                    "zone_1": "Zone 1 Friendly Name",
+                    "zone_2_valid": "Zone 2 has speakers?",
+                    "zone_2": "Zone 2 Friendly Name",
+                    "zone_3_valid": "Zone 3 has speakers?",
+                    "zone_3": "Zone 3 Friendly Name",
+                    "zone_4_valid": "Zone 4 has speakers?",
+                    "zone_4": "Zone 4 Friendly Name",
+                    "zone_5_valid": "Zone 5 has speakers?",
+                    "zone_5": "Zone 5 Friendly Name",
+                    "zone_6_valid": "Zone 6 has speakers?",
+                    "zone_6": "Zone 6 Friendly Name",
+                    "source_1_valid": "Source 1 is an input?",
+                    "source_1": "Source 1 Friendly Name",
+                    "source_2_valid": "Source 2 is an input?",
+                    "source_2": "Source 2 Friendly Name",
+                    "source_3_valid": "Source 3 is an input?",
+                    "source_3": "Source 3 Friendly Name",
+                    "source_4_valid": "Source 4 is an input?",
+                    "source_4": "Source 4 Friendly Name",
+                    "source_5_valid": "Source 5 is an input?",
+                    "source_5": "Source 5 Friendly Name",
+                    "source_6_valid": "Source 6 is an input?",
+                    "source_6": "Source 6 Friendly Name",
+                    "source_7_valid": "Source 7 is an input?",
+                    "source_7": "Source 7 Friendly Name",
+                    "source_8_valid": "Source 8 is an input?",
+                    "source_8": "Source 8 Friendly Name"
+                }
+            }
+        },
+        "error": {
+            "cannot_connect": "Failed to connect",
+            "invalid_auth": "Device is not a HAL CA1006",
+            "unknown": "Unknown error occurred."
+        },
+        "abort": {
+            "already_configured": "This entry is already configured."
+        }
+    }
+}
