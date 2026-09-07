@@ -1,0 +1,15 @@
+turn_off:
+  description: Turn off all HAL zones.
+  fields:
+    hal_name:
+      description: Name of the HAL unit.
+      example: "HAL"
+set_select_interval:
+  description: Set the select interval used for serial comms to the HAL unit.
+  fields:
+    hal_name:
+      description: Name of the HAL unit.
+      example: "HAL"
+    hal_select_interval:
+      description: Time in seconds to wait to data from the HAL unit.
+      example: 0.6

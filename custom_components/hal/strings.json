@@ -1,0 +1,28 @@
+{
+    "title": "HAL CA1006 multi-zone amplifier",
+    "config": {
+        "step": {
+            "user": {
+                "data": {
+                    "host": "[%key:common::config_flow::data::host%]",
+                    "port": "[%key:common::config_flow::data::port%]",
+                    "name": "HAL CA1006 Friendly Name",
+                    "zone_1": "Zone 1 Friendly Name",
+                    "zone_2": "Zone 2 Friendly Name",
+                    "zone_3": "Zone 3 Friendly Name",
+                    "zone_4": "Zone 4 Friendly Name",
+                    "zone_5": "Zone 5 Friendly Name",
+                    "zone_6": "Zone 6 Friendly Name",
+                }
+            }
+        },
+        "error": {
+            "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
+            "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
+            "unknown": "[%key:common::config_flow::error::unknown%]"
+        },
+        "abort": {
+            "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+        }
+    }
+}
