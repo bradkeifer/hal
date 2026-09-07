@@ -4,15 +4,13 @@ import logging
 from typing import Any
 
 import voluptuous as vol
+from halca1006 import HALProtocol  # type: ignore[import-not-found]
 
-from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
+from homeassistant import config_entries, core, exceptions
 from homeassistant.const import CONF_HOST, CONF_PORT
-from homeassistant.core import HomeAssistant
 
 from .const import (
     DOMAIN,
-    CONF_ZONES,
-    CONF_SOURCES,
     CONF_HAL_NAME,
     DEFAULT_HAL_NAME,
     CONF_HAL_SELECT_INTERVAL,
@@ -47,20 +45,12 @@ from .const import (
     HAL_SOURCE_8_VALID,
 )
 
-from halca1006 import HALProtocol
-import asyncio
-
 HAL_TESTS_PASSED = 1
 HAL_CANNOT_CONNECT = 2
 HAL_NOT_HAL = 3
 HAL_VERSION_UNKNOWN = "version unknown"
 
 _LOGGER = logging.getLogger(__name__)
-
-# TODO adjust the data schema to the data that you need
-# ZONE_SCHEMA = vol.Schema({vol.Required(CONF_NAME): cv.string})
-
-# SOURCE_SCHEMA = vol.Schema({vol.Required(CONF_NAME): cv.string})
 
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
@@ -188,9 +178,9 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 class HALTests:
     """Basic tests to validate configuration."""
 
-    def __init__(self, host, port):
+    def __init__(self, host: str, port: int) -> None:
         """Initialize."""
-        _LOGGER.debug(f"HALTests.__init__(): host = {host}, port = {port}")
+        _LOGGER.debug("HALTests.__init__(): host = %s, port = %d", host, port)
         self.host = host
         self.port = port
 
@@ -205,60 +195,44 @@ class HALTests:
         hal = HALProtocol(self.host, self.port)
         _LOGGER.debug("Enabling HALProtocol logger")
         hal.enable_logger()
-        _LOGGER.debug(f"Checking we can connect to HAL at {self.host}, {self.port}.")
+        _LOGGER.debug("Checking we can connect to HAL at %s, %d", self.host, self.port)
         if not await hass.async_add_executor_job(hal.connect):
             _LOGGER.error(
-                f"HALTests.validate: Unable to connect. Returning HAL_CANNOT_CONNECT."
+                "HALTests.validate: Unable to connect. Returning HAL_CANNOT_CONNECT."
             )
             validate_results["connect"] = HAL_CANNOT_CONNECT
         else:
-            # TODO add an is_hal() method to the HALProtocol class to validate we are connecting
-            #      to a HAL unit. Throw InvalidAuth if it's not a HAL.
+            # TODO(@bradkeifer): add an is_hal() method to HALProtocol to validate
+            #      we are connecting to a HAL unit. Throw InvalidAuth if it's not a HAL.
             validate_results["fw_version"] = await hass.async_add_executor_job(
                 hal.get_version
             )
             await hass.async_add_executor_job(hal.disconnect)
-        _LOGGER.debug(f"HALTests.validate() complete. Results are {validate_results}.")
+        _LOGGER.debug("HALTests.validate() complete. Results are %s.", validate_results)
 
         return validate_results
 
 
-async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
-    """Validate the user input allows us to connect.
+async def validate_input(
+    hass: core.HomeAssistant, data: dict[str, Any]
+) -> dict[str, str]:
+    """
+    Validate the user input allows us to connect.
 
     Data has the keys from STEP_USER_DATA_SCHEMA with values provided by the user.
     """
-    # TODO validate the data can be used to set up a connection.
-
-    # If your PyPI package is not built with async, pass your methods
-    # to the executor:
-    # await hass.async_add_executor_job(
-    #     your_validate_func, data["username"], data["password"]
-    # )
-
-    # hub = PlaceholderHub(data["host"])
-
-    # if not await hub.authenticate(data["username"], data["password"]):
-    #     raise InvalidAuth
-
-    # If you cannot connect:
-    # throw CannotConnect
-    # If the authentication is wrong:
-    # InvalidAuth
-
-    _LOGGER.debug(f"hal.config_flow.validate_input: data = {data}")
     _LOGGER.debug("Instantiate HALTests")
     hal_tests = HALTests(data["host"], data["port"])
     test_results = await hal_tests.validate(hass)
     if test_results["connect"] == HAL_CANNOT_CONNECT:
         raise CannotConnect
-    elif test_results["is_hal"] == HAL_NOT_HAL:
+    if test_results["is_hal"] == HAL_NOT_HAL:
         raise InvalidAuth
 
     # Obtain firmware version of the HAL
     fw_version = HAL_VERSION_UNKNOWN
     fw_version = test_results["fw_version"]
-    _LOGGER.debug(f"HAL firmware version is {fw_version}.")
+    _LOGGER.debug("HAL firmware version is %s.", fw_version)
 
     _LOGGER.debug("HALTests Completed")
 
@@ -269,11 +243,10 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     }
 
 
-class HALConfigFlow(ConfigFlow, domain=DOMAIN):
+class HALConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for HAL CA1006 multi-zone amplifier."""
 
     VERSION = 1
-    CONNECTION_CLASS = CONN_CLASS_LOCAL_POLL
 
     def __init__(self) -> None:
         """Initialize."""
@@ -281,59 +254,52 @@ class HALConfigFlow(ConfigFlow, domain=DOMAIN):
         self.host = None
         self.port = None
 
-    async def async_step_user(self, user_input=None):
+    async def async_step_user(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.ConfigFlowResult:
         """Handle the initial step."""
-        errors = {}
-        if user_input is not None:
-            try:
-                info = await validate_input(self.hass, user_input)
-            except CannotConnect:
-                errors["base"] = "cannot_connect"
-            except InvalidAuth:
-                errors["base"] = "invalid_auth"
-            except Exception:
-                _LOGGER.exception("Unexpected exception")
-                errors["base"] = "unknown"
-            else:
-                _LOGGER.debug(f"Set unique identifier to {user_input[CONF_HAL_NAME]}")
-                await self.async_set_unique_id(user_input[CONF_HAL_NAME])
-                _LOGGER.debug(f"async_step_user: Self is {self}")
-                self._abort_if_unique_id_configured(
-                    updates={
-                        CONF_HOST: user_input[CONF_HOST],
-                        CONF_PORT: user_input[CONF_PORT],
-                    }
-                )
-                user_input["sw_version"] = info["sw_version"]
-                return self.async_create_entry(
-                    title=info["title"],
-                    data=user_input,
-                )
-
+        if user_input is None:
             return self.async_show_form(
-                step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
+                step_id="user", data_schema=STEP_USER_DATA_SCHEMA
             )
 
-    async def async_step_reconfigure(self, user_input: dict[str, Any] | None = None):
         errors = {}
+
+        try:
+            info = await validate_input(self.hass, user_input)
+        except CannotConnect:
+            errors["base"] = "cannot_connect"
+        except InvalidAuth:
+            errors["base"] = "invalid_auth"
+        except Exception:  # pylint: disable=broad-except
+            _LOGGER.exception("Unexpected exception")
+            errors["base"] = "unknown"
+        else:
+            _LOGGER.debug("Set unique identifier to %s", user_input[CONF_HAL_NAME])
+            await self.async_set_unique_id(user_input[CONF_HAL_NAME])
+            self._abort_if_unique_id_configured()
+            user_input["sw_version"] = info["sw_version"]
+            return self.async_create_entry(title=info["title"], data=user_input)
+
+        return self.async_show_form(
+            step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
+        )
+
+    async def async_step_reconfigure(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.ConfigFlowResult:
+        """
+        Handle the reconfiguration step.
+
+        TODO<@bradkeifer>: Populate form with existing config values
+        """
         if user_input is not None:
-            try:
-                info = await validate_input(self.hass, user_input)
-            except CannotConnect:
-                errors["base"] = "cannot_connect"
-            except InvalidAuth:
-                errors["base"] = "invalid_auth"
-            except Exception:
-                _LOGGER.exception("Unexpected exception")
-                errors["base"] = "unknown"
-            else:
-                await self.async_set_unique_id(user_input[CONF_HAL_NAME])
-                self._abort_if_unique_id_mismatch()
-                user_input["sw_version"] = info["sw_version"]
-                return self.async_update_reload_and_abort(
-                    self._get_reconfigure_entry(),
-                    data_updates=user_input,
-                )
+            await self.async_set_unique_id(user_input[CONF_HAL_NAME])
+            self._abort_if_unique_id_mismatch()
+            return self.async_update_reload_and_abort(
+                self._get_reconfigure_entry(),
+                data_updates=user_input,
+            )
 
         return self.async_show_form(
             step_id="reconfigure",
@@ -344,10 +310,6 @@ class HALConfigFlow(ConfigFlow, domain=DOMAIN):
 class CannotConnect(exceptions.HomeAssistantError):
     """Error to indicate we cannot connect."""
 
-    _LOGGER.error("Cannot connect")
-
 
 class InvalidAuth(exceptions.HomeAssistantError):
     """Error to indicate there is invalid auth."""
-
-    _LOGGER.error("Invalid auth")
