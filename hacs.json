@@ -1,5 +1,5 @@
 {
-    "name": "Integration blueprint",
-    "homeassistant": "2026.6.4",
+    "name": "HAL CA1006 Multi-zone Amplifier",
+    "homeassistant": "2026.9.0",
     "hacs": "2.0.5"
 }
