@@ -58,3 +58,17 @@ These are some next steps you may want to look into:
 - Create your first release.
 - Share your integration on the [Home Assistant Forum](https://community.home-assistant.io/).
 - Submit your integration to [HACS](https://hacs.xyz/docs/publish/start).
+
+### hal
+Support for the HAL CA1006 multi-zone amplifier.
+
+Based on top of a python module I wrote, [halca1006](https://github.com/bradkeifer/halca1006).
+I am successfully running this in my own Home Assistant system, so feel free to use it at your
+own risk.
+
+
+The component supports the config_flow style of configuration.
+It creates one device for the HAL unit and one device for each zone that has connected speakers.
+It also creates one `media_player` entity for each zone that has connected speakers.
+The device and entity names are user defined in order to make them user friendly and fit for
+purpose for the specific installation.
