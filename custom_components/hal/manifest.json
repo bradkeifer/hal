@@ -3,8 +3,8 @@
   "name": "HAL CA1006 multi-zone amplifier",
   "version": "0.0.5",
   "integration_type": "hub",
-  "documentation": "https://github.com/bradkeifer/home-assistant-custom-components",
-  "issue_tracker": "https://github.com/bradkeifer/home-assistant-custom-components/issues",
+  "documentation": "https://github.com/bradkeifer/hal",
+  "issue_tracker": "https://github.com/bradkeifer/hal/issues",
   "dependencies": [
     "media_player"
   ],
