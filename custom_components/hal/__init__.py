@@ -26,10 +26,24 @@ from .const import (
     HAL_SCAN_INTERVAL,
     HAL_CONNECT_RETRY_INTERVAL,
     SERVICE_TURN_OFF,
+    SERVICE_INTERCOM_ENABLE,
+    SERVICE_INTERCOM_DISABLE,
     SERVICE_SET_SELECT_INTERVAL,
 )
 
 SERVICE_TURN_OFF_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_HAL_NAME, default=DEFAULT_HAL_NAME): str,
+    }
+)
+
+SERVICE_INTERCOM_ENABLE_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_HAL_NAME, default=DEFAULT_HAL_NAME): str,
+    }
+)
+
+SERVICE_INTERCOM_DISABLE_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_HAL_NAME, default=DEFAULT_HAL_NAME): str,
     }
@@ -84,6 +98,48 @@ async def async_setup(hass: HomeAssistant, config: dict):
     )
     hass.services.async_register(
         DOMAIN, SERVICE_TURN_OFF, turn_off, schema=SERVICE_TURN_OFF_SCHEMA
+    )
+
+    _LOGGER.debug("Defining intercom_enable service")
+
+    async def intercom_enable(service):
+        """Enable Intercom Interrupt mode."""
+        hal_name = service.data[CONF_HAL_NAME]
+        _LOGGER.debug(
+            f"intercom_enable: Enabling Intercom Interupt mode for HAL unit {hal_name} from {hal_collect}."
+        )
+        await hass.async_add_executor_job(hal_collect[hal_name].intercom_enable)
+
+    _LOGGER.debug(
+        f"async_setp: Registering service {SERVICE_INTERCOM_ENABLE} for domain {DOMAIN} "
+        f"with schema {SERVICE_INTERCOM_ENABLE_SCHEMA}."
+    )
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_INTERCOM_ENABLE,
+        turn_off,
+        schema=SERVICE_INTERCOM_ENABLE_SCHEMA,
+    )
+
+    _LOGGER.debug("Defining intercom_disable service")
+
+    async def intercom_disable(service):
+        """Disable Intercom Interrupt mode."""
+        hal_name = service.data[CONF_HAL_NAME]
+        _LOGGER.debug(
+            f"intercom_disable: Disabling Intercom Interupt mode for HAL unit {hal_name} from {hal_collect}."
+        )
+        await hass.async_add_executor_job(hal_collect[hal_name].intercom_disable)
+
+    _LOGGER.debug(
+        f"async_setp: Registering service {SERVICE_INTERCOM_DISABLE} for domain {DOMAIN} "
+        f"with schema {SERVICE_INTERCOM_DISABLE_SCHEMA}."
+    )
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_INTERCOM_DISABLE,
+        turn_off,
+        schema=SERVICE_INTERCOM_DISABLE_SCHEMA,
     )
 
     _LOGGER.debug(f"Defining set_select_interval service")

@@ -13,3 +13,15 @@ set_select_interval:
     hal_select_interval:
       description: Time in seconds to wait to data from the HAL unit.
       example: 0.6
+intercom_enable:
+  description: Enable Intercom Interupt mode.
+  fields:
+    hal_name:
+      description: Name of the HAL unit.
+      example: "HAL"
+intercom_disable:
+  description: Disable Intercom Interupt mode.
+  fields:
+    hal_name:
+      description: Name of the HAL unit.
+      example: "HAL"
