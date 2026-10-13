@@ -1,7 +1,7 @@
 {
   "domain": "hal",
   "name": "HAL CA1006 multi-zone amplifier",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "integration_type": "hub",
   "documentation": "https://github.com/bradkeifer/hal",
   "issue_tracker": "https://github.com/bradkeifer/hal/issues",

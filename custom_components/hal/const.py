@@ -60,5 +60,5 @@ HAL_CONNECT_RETRY_INTERVAL = 10  # Seconds
 
 SERVICE_TURN_OFF = "turn_off"
 SERVICE_INTERCOM_ENABLE = "intercom_enable"
-SERVICE_INTERCOM_DISABLE = "intercom_=disable"
+SERVICE_INTERCOM_DISABLE = "intercom_disable"
 SERVICE_SET_SELECT_INTERVAL = "set_select_interval"
