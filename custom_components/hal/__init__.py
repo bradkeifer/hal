@@ -117,7 +117,7 @@ async def async_setup(hass: HomeAssistant, config: dict):
     hass.services.async_register(
         DOMAIN,
         SERVICE_INTERCOM_ENABLE,
-        turn_off,
+        intercom_enable,
         schema=SERVICE_INTERCOM_ENABLE_SCHEMA,
     )
 
@@ -138,7 +138,7 @@ async def async_setup(hass: HomeAssistant, config: dict):
     hass.services.async_register(
         DOMAIN,
         SERVICE_INTERCOM_DISABLE,
-        turn_off,
+        intercom_disable,
         schema=SERVICE_INTERCOM_DISABLE_SCHEMA,
     )
 
